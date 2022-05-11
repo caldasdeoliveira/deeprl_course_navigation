@@ -23,6 +23,25 @@ class Agent():
      lr = 5e-4,
      update_every = 20,
      ):
+        """ DQN agent
+
+        This class instantiates a DQN agent with TODO
+
+        Args:
+            state_size (int): shape of the state encoding.
+            action_size (int): number of actions in the environment.
+            seed (int): seed for random number generators.
+            buffer_size (int): "memory size", how many experiences can the agent store.
+            batch_size (int): number of experiences in a batch.
+            gamma (float): reward decay, rewards in the future are worse than
+                           imidiate rewards. Between 0 and 1. 
+            tau (float): factor with which we control the size of the update
+                         of the target network. Between 0 and 1.
+            lr (float): learning rate for the agent. Between 0 and 1.
+            update_every (int): number of episodes after which the agent weights 
+                                are updated.
+
+        """
         self.state_size = state_size
         self.action_size = action_size
         self.seed = random.seed(seed)
@@ -49,6 +68,20 @@ class Agent():
         self.t_step = 0
 
     def step(self, state, action, reward, next_state, done):
+        """ Agent takes a "step"
+
+        This function updates the internal state of the agent, adding the 
+        experience to the buffer and triggering learning if the proper 
+        conditions are met
+
+        Args:
+            state (): Old (or current) state of the environment
+            action (): Action taken
+            reward (): Reward obtained by executing `action` in `state`
+            next_state (): Current (or next) state of the environment
+            done (bool): indicates whether the episode is finished
+
+        """
         # Save experience in replay memory
         self.memory.add(state, action, reward, next_state, done)
 
@@ -64,6 +97,19 @@ class Agent():
                 self.learn(experiences, self.gamma) 
 
     def act(self, state, eps):
+        """ Policy
+
+        Epsilon greedy policy using TODO
+
+        Args:
+            state: current state of the agent
+            eps (float): current epsilon value. Likelyhood of the agent 
+                         selecting an action at random.
+
+        Returns:
+            action (int): action the agent will take
+
+        """
         state = torch.from_numpy(state).float().unsqueeze(0).to(device)
         self.qnetwork_local.eval() # setting to eval mode
         with torch.no_grad():
@@ -95,9 +141,18 @@ class Agent():
         self.optimizer.step()
 
         # ------------------- update target network ------------------- #
-        self.update(self.qnetwork_local, self.qnetwork_target, self.tau)                     
+        self.soft_update(self.qnetwork_local, self.qnetwork_target, self.tau)                     
 
-    def update(self, local_model, target_model, tau):
+    def soft_update(self, local_model, target_model, tau):
+        """ title
+
+        does
+
+        Args:
+
+        Returns:
+
+        """
         for target_param, local_param in zip(target_model.parameters(), local_model.parameters()):
             target_param.data.copy_(tau*local_param.data + (1.0-tau)*target_param.data)
 
@@ -108,8 +163,7 @@ class ReplayBuffer:
 
     def __init__(self, action_size, buffer_size, batch_size, seed):
         """Initialize a ReplayBuffer object.
-        Params
-        ======
+        Args:
             action_size (int): dimension of each action
             buffer_size (int): maximum size of buffer
             batch_size (int): size of each training batch

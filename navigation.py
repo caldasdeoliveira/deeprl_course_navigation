@@ -1,6 +1,18 @@
+# # Training script
+#
+# ## Imports
+
+# +
 from unityagents import UnityEnvironment
 import numpy as np
 from collections import namedtuple, deque
+import torch
+
+import matplotlib.pyplot as plt
+# %matplotlib inline
+# -
+
+# ## Initializing environment
 
 env = UnityEnvironment(file_name="Banana.app")
 
@@ -8,7 +20,10 @@ env = UnityEnvironment(file_name="Banana.app")
 brain_name = env.brain_names[0]
 brain = env.brains[brain_name]
 
+# Value for random seed
 seed = 42
+
+# ### Checking environment and setting utility variables
 
 # +
 # reset the environment
@@ -26,6 +41,9 @@ state = env_info.vector_observations[0]
 print('States look like:', state)
 state_size = len(state)
 print('States have length:', state_size)
+# -
+
+# ## Instantiate agent
 
 # +
 from dqn import Agent
@@ -34,11 +52,31 @@ from dqn import Agent
 agent = Agent(state_size, action_size, seed)
 
 
+# -
+
+# ## Training
+
 # +
 def train_dqn_agent(n_episodes=2000, max_t=1000, eps_start=1.0, eps_end=0.01, eps_decay=0.995):
-    scores = []                        # list containing scores from each episode
-    scores_window = deque(maxlen=100)  # last 100 scores
-    eps = eps_start                    # initialize epsilon
+    """ Train the instantiated agent and saves the best model.
+
+        Args:
+            n_episodes (int): number of episodes to train on.
+            max_t (int): maximum number of actions an episode contains
+            eps_start (int): starting value for epsilon
+            eps_end (int): minimum value that epsilon can take
+            eps_decay (int): epsilon decay factor per episode
+            
+        Returns:
+            scores (list[int]): list with the score in each episode
+
+        """
+    
+    scores = []                      # list containing scores from each episode
+    scores_window = deque(maxlen=100)# last 100 scores
+    eps = eps_start                  # initialize epsilon
+    best_score_yet = 13.0            # best score so far, determines when to save
+    
     for i_episode in range(1, n_episodes+1):
         env_info = env.reset(train_mode = True)[brain_name] # reset the environment
         state = env_info.vector_observations[0]            # get the current state
@@ -66,13 +104,20 @@ def train_dqn_agent(n_episodes=2000, max_t=1000, eps_start=1.0, eps_end=0.01, ep
         print('\rEpisode {}\tAverage Score: {:.2f}'.format(i_episode, np.mean(scores_window)), end="")
         if i_episode % 100 == 0:
             print('\rEpisode {}\tAverage Score: {:.2f}'.format(i_episode, np.mean(scores_window)))
-        if np.mean(scores_window)>=13.0:
-            print('\nEnvironment solved in {:d} episodes!\tAverage Score: {:.2f}'.format(i_episode-100, np.mean(scores_window)))
+        if np.mean(scores_window) >= best_score_yet:
+            if best_score_yet == 13.0:
+                print(
+                    f'\nEnvironment solved in {i_episode-100:d} episodes!'\
+                    f'\tAverage Score: {np.mean(scores_window):.2f}'
+                )
+            else:
+                print(f"\nSaving better agent with Average Score: {np.mean(scores_window):.2f}")
             torch.save(agent.qnetwork_local.state_dict(), 'checkpoint.pth')
-            break
+            best_score_yet += 1
     return scores
 
 scores = train_dqn_agent()
+# -
 
 # plot the scores
 fig = plt.figure()
@@ -81,7 +126,8 @@ plt.plot(np.arange(len(scores)), scores)
 plt.ylabel('Score')
 plt.xlabel('Episode #')
 plt.show()
-# -
+
+# ## Clean up
 
 env.close()
 

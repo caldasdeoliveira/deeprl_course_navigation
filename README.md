@@ -1,6 +1,6 @@
 # Udacity Deep Reinforcement Learning course - Project 1: Navigation
 
-TODO gif and project details
+![agent](images/agent.gif)
 
 This repository contains my solution for the first project of Udacity's course on Reinforcement Learning. The scenario consists of an agent navigating an environment collecting yellow bananas while avoiding blue bananas.
 

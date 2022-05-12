@@ -16,12 +16,13 @@ class Agent():
      state_size,
      action_size,
      seed,
+     model_state_dict_path = None,
      buffer_size = int(1e5),
-     batch_size = 128,
+     batch_size = 64,
      gamma = 0.99,
      tau = 1e-3,
      lr = 5e-4,
-     update_every = 20,
+     update_every = 4,
      ):
         """ DQN agent
 
@@ -31,6 +32,7 @@ class Agent():
             state_size (int): shape of the state encoding.
             action_size (int): number of actions in the environment.
             seed (int): seed for random number generators.
+            model_state_dict_path (str): path to 
             buffer_size (int): "memory size", how many experiences can the agent store.
             batch_size (int): number of experiences in a batch.
             gamma (float): reward decay, rewards in the future are worse than
@@ -58,8 +60,14 @@ class Agent():
             QNetwork(state_size, action_size, seed,).to(device)
         self.qnetwork_target = \
             QNetwork(state_size, action_size, seed,).to(device)
-        self.optimizer = optim.Adam(self.qnetwork_local.parameters(), lr=lr)
         
+
+        if model_state_dict_path:
+            self.qnetwork_local.load_state_dict(torch.load(model_state_dict_path))
+            self.qnetwork_target.load_state_dict(torch.load(model_state_dict_path))
+
+        self.optimizer = optim.Adam(self.qnetwork_local.parameters(), lr=lr)
+
         # Replay memory
         self.memory = \
             ReplayBuffer(action_size, self.buffer_size, self.batch_size, seed)
@@ -144,14 +152,15 @@ class Agent():
         self.soft_update(self.qnetwork_local, self.qnetwork_target, self.tau)                     
 
     def soft_update(self, local_model, target_model, tau):
-        """ title
-
-        does
+        """ Soft update model parameters.
+        
+        Update using the following formula
+        θ_target = τ*θ_local + (1 - τ)*θ_target
 
         Args:
-
-        Returns:
-
+            local_model (PyTorch model): weights will be copied from
+            target_model (PyTorch model): weights will be copied to
+            tau (float): interpolation parameter 
         """
         for target_param, local_param in zip(target_model.parameters(), local_model.parameters()):
             target_param.data.copy_(tau*local_param.data + (1.0-tau)*target_param.data)

@@ -117,6 +117,12 @@ def train_dqn_agent(n_episodes=2000, max_t=1000, eps_start=1.0, eps_end=0.01, ep
     return scores
 
 scores = train_dqn_agent()
+
+# +
+import pickle
+
+with open('scores.pkl', 'ab') as f:
+    pickle.dump(scores,f)
 # -
 
 # plot the scores

@@ -15,6 +15,10 @@ fi
 
 conda activate drl_navigation
 
+# This repo uses git submodules and therefore should be cloned with the --recursive flag
+# in case you forgot to do this the following line of code handles this for you
+git submodule update --init
+
 # locally install the unity environment
 cd Value-based-methods/python
 pip install .

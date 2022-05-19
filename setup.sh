@@ -1,6 +1,10 @@
 # This script is designed to work on MAC 
 # (only tested on Monterey version 12.2.1 with an intel i5)
 
+# This repo uses git submodules and therefore should be cloned with the --recursive flag
+# in case you forgot to do this the following line of code handles this for you
+git submodule update --init
+
 # Automated error correction in Value-based-methods repo. Torch is set to 0.4.0 which causes an error
 sed -ie "s/torch==([0-9]+\.[0-9]+\.[0-9]+)/torch==1.4.0/g" Value-based-methods/python/requirements.txt
 
